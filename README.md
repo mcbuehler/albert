@@ -4,6 +4,9 @@
 
 Backend and assistant configurations for **Albert**, a Vapi voice assistant with long-term memory (Hindsight). Albert answers inbound calls, places outbound and scheduled callbacks, archives call records and available recordings and transcripts, and provides a staff page to manage customers and review calls.
 
+[<img src="public/assets/img/backend1.jpg" alt="Customers page with customer details and callback controls" width="320">](public/assets/img/backend1.jpg)
+[<img src="public/assets/img/backend2.jpg" alt="Calls page with scheduled callbacks and archived calls" width="320">](public/assets/img/backend2.jpg)
+
 ## Quickstart
 
 Use [uv](https://docs.astral.sh/uv/) with Python 3.12. A working deployment needs **Supabase, Hindsight Cloud, Vapi and Brave Search API accounts**, plus a compatible phone connection.
