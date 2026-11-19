@@ -1,6 +1,6 @@
 # Albert: system overview
 
-Albert is a voice companion. Vapi runs the phone calls, and the Flask backend (`albert/`) provides customer data, memory, scheduling and tools. The diagram shows a Vercel deployment with environment variable names in brackets. See the [quickstart](../README.md#quickstart) and [Vapi setup guide](vapi-setup.md) to reproduce it.
+Albert is a voice companion. Vapi runs the phone calls, and the Flask backend (`albert/`) provides customer data, memory, scheduling and tools. The diagram shows a Vercel deployment with environment variable names in brackets. See the [quickstart](setup.md) and [Vapi setup guide](vapi-setup.md) to reproduce it.
 
 ```mermaid
 flowchart LR
@@ -134,3 +134,22 @@ Variables are set once at the start of the call. During a long call, the differe
 Business rules (calling hours, retries, timeouts) are kept in `albert/config.py`, not in env vars.
 
 _Edit the diagram in any editor. You can preview it at <https://mermaid.live> or in the VS Code Markdown preview with a Mermaid extension._
+
+## Features
+
+- **Memory:** one Hindsight bank per customer, created at onboarding. Customers' calls never run without their memory; non-customers get none (no consent).
+- **Callbacks:** scheduled in the customer's local time (calling hours 09:00–22:00, `config.CALLING_START` / `CALLING_END`), dialled by a dispatcher that Vercel Cron runs every minute; up to 4 attempts (unanswered calls, including voicemail, are retried after 60 minutes), one call per Vapi phone number and per customer at a time.
+- **Staff page** (`/`): customer list and detail panel, Calls tab (all archived calls and upcoming callbacks: search, status filter, sort, paging, a "now" line between upcoming and past, recording/transcript icons; a detail dialog with recording, transcript and staff notes that staff can add to), schedule / call now / cancel, onboarding, editing (name, time zone, default assistant), review of inbound sign-ups, danger zone (erase memory, delete customer). Sign-in by Supabase magic link.
+
+
+## Repository layout
+
+| Path | What |
+|---|---|
+| `albert/` | Flask app: `routes.py` (endpoints), `dispatcher.py`, `scheduling.py`, `vapi.py`, `memory.py`, `auth.py`, `db.py`, `archive.py` (call archive cron), `storage.py` (Supabase Storage), `config.py` (business rules) … |
+| `main.py` | Entry point for Vercel / gunicorn (`main:app`) |
+| `public/` | Staff page: plain HTML/CSS and ES modules, no build step |
+| `migrations/` | Plain SQL for Supabase Postgres, applied in order |
+| `tests/` | `unittest` suite: external APIs mocked, database layer tested against throwaway local PostgreSQL |
+| [`vapi/assistants/`](../vapi/assistants/) | English and German Albert Live templates, including both inbound variants |
+| `docs/` | [Architecture](architecture.md), [Vapi setup](vapi-setup.md), and [archive schema](call-archive-schema.md) |

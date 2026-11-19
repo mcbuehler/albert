@@ -1,0 +1,14 @@
+# Known production issues
+
+### Recording and consent
+
+Vapi can start recording and transcribing as soon as a call begins. Albert's archive is enabled by default and can copy those artifacts before the caller has explicitly consented. **During the prototype, we manually deleted every conversation for which we had no explicit consent.** A production deployment needs explicit consent before recording or storing conversations, with recording and archive capture disabled by default. The bundled GPT-Live assistants need a separate consent flow because Vapi's built-in recording consent plan is incompatible with GPT-Live. [Vapi artifact defaults](https://docs.vapi.ai/observability/logs/overview) · [GPT-Live restrictions](https://docs.vapi.ai/gpt-live/configuration#recordings-and-post-call-data)
+
+### Bugs and security gaps
+
+- **Caller verification.** Inbound caller ID is enough to load a customer's memory and callback details and to associate the call report with their memory. Verify the caller before exposing private context, writing to their memory, or changing their callbacks. [Inbound routing](../albert/vapi.py) · [Webhook](../albert/routes.py)
+- **Callback opt-out.** The assistant can end the current call when a caller asks for no more calls, while pending callbacks remain scheduled. Store the opt-out, cancel queued callbacks, and enforce it on future calls. Maintain callback preferences independently of conversation retention. [End-call skill](../vapi/assistants/albert-live-en.yml) · [Dispatcher database logic](../albert/db.py)
+- **GPT-Live import.** All four assistant exports contain model and voice fallbacks that must be removed before import. Verify assistant creation and calls in a fresh organization. [Vapi migration guide](https://docs.vapi.ai/gpt-live/migrate#before-you-start)
+- **Dependencies with security advisories.** The lockfile pins affected versions of `requests`, `urllib3`, and `certifi`. Upgrade to patched versions, regenerate the lockfile, and rerun the tests. [Requests advisory](https://github.com/psf/requests/security/advisories/GHSA-gc5v-m9x4-r6x2) · [urllib3 advisory](https://github.com/urllib3/urllib3/security/advisories/GHSA-vxq7-64xx-v4gw) · [Certifi advisory](https://github.com/pypa/advisory-database/blob/main/vulns/certifi/PYSEC-2026-4320.yaml)
+- **Memory errors.** The pinned Hindsight adapter can report a failed recall as an empty result and acknowledge a failed write. Surface those errors and test both paths with the installed adapter. [Memory integration](../albert/memory.py)
+- **Archive deletion.** Disabling capture also pauses queued recording deletion. The archive has no automatic expiry or staff action for deleting a single call. Keep cleanup running independently of capture and define retention and deletion for all callers. [Archive worker](../albert/archive.py) · [Archive schema](call-archive-schema.md)

@@ -2,7 +2,13 @@
 
 Apply `migrations/014_call_archive.sql` and then `migrations/015_archive_scan_windows.sql` after 001–013.
 Both are additive and rerunnable. Migration 015 adds a JSON array of pending scan subdivisions.
-The scheduler and private storage bucket are set up separately in the [quickstart](../README.md#quickstart).
+The scheduler and private storage bucket are set up separately in the [quickstart](setup.md).
+
+## Capture and retention
+
+The archive job scans the calls visible to your Vapi API key, including unknown and rejected callers. It stores call metadata and spoken transcripts in Postgres and available recordings in the private Supabase bucket. This runs independently of Hindsight memory and its onboarding consent. Use a dedicated Vapi organization if the calls in another project should stay out of this archive.
+
+The reconciliation window defaults to 14 days to match the original Vapi account's retention. Set `ARCHIVE_PROVIDER_RETENTION_DAYS` in [`albert/config.py`](../albert/config.py) for your account. Albert keeps its archived copies independently of Vapi's retention. Deleting a customer removes their archive entries and queues recordings for deletion. Erasing Hindsight memory keeps the archive. To disable archive capture, set `ARCHIVE_CAPTURE_ENABLED = False`. The database contracts are described below.
 
 ## Tables
 
@@ -163,7 +169,7 @@ key). `claim_audio_cleanup` first drops jobs for keys a record still references,
 (5-minute takeover); the cron deletes the object via Supabase's bulk delete (a missing object counts
 as deleted), `finish_audio_cleanup` removes the job, `retry_audio_cleanup` backs off 1–60 minutes and
 retries forever. Up to 10 per run, before audio transfer. Erase memory keeps the archive (dialog says
-so). Single-call deletion (staff, incl. unknown callers) comes with the Calls tab API.
+so). Single-call deletion, including for unknown callers, remains a production gap.
 
 Short-lived playback links with renewal were approved by the user. Five minutes is the initial
 planned lifetime; access revocation cannot recall already downloaded audio. Archive retention
@@ -221,7 +227,7 @@ No real Vapi, Supabase or Hindsight services are used.
 
 `tests/test_archive.py` covers safe provider parsing, recording redirects, bounded downloads, audio transfer, audio job retries/budget, strict list/detail reads, window splitting,
 budget limits, lease loss and independent refresh after scan failure. Route tests cover staff and
-cron access, disabled capture, status errors and generic responses. See the [test instructions](../README.md#tests)
+cron access, disabled capture, status errors and generic responses. See the [test instructions](development.md#tests)
 to run the full suite against disposable PostgreSQL.
 
 `config.ARCHIVE_CAPTURE_ENABLED` defaults to `True`, and `vercel.json` schedules `/api/cron/archive` every minute.

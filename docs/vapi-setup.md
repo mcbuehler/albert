@@ -1,6 +1,6 @@
 # Set up Albert in Vapi
 
-Start with the [backend quickstart](../README.md#quickstart) and a Vapi organization for this deployment.
+Start with the [backend quickstart](setup.md) and a Vapi organization for this deployment.
 Vapi needs to reach the Flask backend at a public HTTPS URL. Use a phone connection that supports
 GPT-Live, such as native Twilio or Vapi SIP. [GPT-Live compatibility](https://docs.vapi.ai/gpt-live/configuration)
 
@@ -57,10 +57,10 @@ sends queued notifications when [SMTP is configured](../.env.example).
    the greeting with `{{customer_first_name}}`, which Albert provides. For retry testing, clear the
    sample voicemail message and enable Vapi voicemail detection where supported by your call setup.
    Verify the ended reason on a call that reaches a test mailbox. [Voicemail detection](https://docs.vapi.ai/calls/voicemail-detection)
-4. Enter the completed settings in the Vapi dashboard or convert the YAML to JSON and use the Create
-   Assistant API. Publish the assistants in your Vapi organization. The templates preserve the source
-   voice, transcriber, endpointing, and fallback fields. Use the GPT-Live compatibility reference to
-   determine which audio settings apply to this model. [Create Assistant API](https://docs.vapi.ai/api-reference/assistants/create) · [GPT-Live compatibility](https://docs.vapi.ai/gpt-live/configuration)
+4. Remove `model.fallbackModels` and `voice.fallbackPlan` before importing the GPT-Live assistants.
+   Enter the completed settings in the Vapi dashboard or convert the YAML to JSON and use the Create
+   Assistant API. Publish the assistants in your Vapi organization. Use the GPT-Live compatibility reference
+   to determine which source audio settings apply. [Create Assistant API](https://docs.vapi.ai/api-reference/assistants/create) · [GPT-Live compatibility](https://docs.vapi.ai/gpt-live/configuration)
 5. Set the test phone number's server URL to your backend's `/api/webhook` and attach the same
    bearer credential. Leave the number's assistant unassigned so incoming calls send
    `assistant-request` and Albert chooses an assistant. Use an outbound-capable number for callbacks.
@@ -93,7 +93,7 @@ US, Canadian, or Swiss number use the regional inbound assistant or fallback.
    tab or wait for the scheduled job. Answer the call and share a harmless test detail. Call again
    once Vapi has delivered the end-of-call report and ask Albert to recall it.
 4. To test the archive, set `artifactPlan.recordingEnabled` and `artifactPlan.transcriptPlan.enabled`
-   to `true` on the test assistants and create the [private recording bucket](../README.md#quickstart).
+   to `true` on the test assistants and create the [private recording bucket](setup.md).
    Run the archive from **Debug** after the call ends, then open **Calls** and check the transcript and
    playback once the artifacts are available.
    [Vapi call artifacts](https://docs.vapi.ai/assistants/call-recording)
@@ -101,4 +101,4 @@ US, Canadian, or Swiss number use the regional inbound assistant or fallback.
 Vapi artifact collection and the Hindsight memory consent step serve different purposes. Albert's
 archive scans calls in the Vapi organization, including unknown callers, and stores available
 transcripts and recordings when capture is enabled. Review the artifact settings and decide which
-calls to record before using a real phone number. [Archive schema](call-archive-schema.md)
+calls to record before using a real phone number. [Known production issues](known-production-issues.md) · [Archive schema](call-archive-schema.md)
