@@ -1,6 +1,8 @@
 # Albert
 
 [![Tests](https://github.com/mcbuehler/albert/actions/workflows/tests.yml/badge.svg)](https://github.com/mcbuehler/albert/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python: 3.12](https://img.shields.io/badge/Python-3.12-3776AB.svg)](https://www.python.org/downloads/release/python-3120/)
 
 Backend and assistant configurations for **Albert**, a [Vapi](https://vapi.ai/) voice assistant with long-term memory ([Hindsight](https://ui.hindsight.vectorize.io)). Albert answers inbound calls, places outbound and scheduled callbacks, archives call records and available recordings and transcripts, and provides a staff page to manage customers and review calls.
 
