@@ -1,0 +1,52 @@
+# Run the backend unit tests on every push and pull request.
+# Everything external (Supabase, Vapi, Hindsight, Brave, wttr.in) is mocked: no secrets needed.
+# tests/test_db.py runs against a throwaway Postgres service container (never Supabase).
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+# A newer push to the same branch cancels the run that is still going.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17  # same major version as the Docker image
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: albert_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"  # same as the Docker image
+          enable-cache: true
+
+      - name: Install dependencies (exactly as in uv.lock)
+        run: uv sync --locked
+
+      - name: Lint and check import formatting
+        run: uv run --no-sync ruff check .
+
+      - name: Run tests
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/albert_test
+        run: uv run --no-sync python -m unittest discover -s tests -v

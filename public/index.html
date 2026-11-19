@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Backend · Albert by REL8</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+
+<body>
+  <header class="in">
+    <nav class="top">
+      <span class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <clipPath id="c">
+              <circle cx="60" cy="60" r="60" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#c)">
+            <rect width="120" height="120" fill="#f4b63f" />
+            <path d="M18 124q-2-40 14-62l-4-22 16 12q16-6 32 0l16-12-4 22q16 22 14 62z" fill="#8a6548" />
+            <ellipse cx="60" cy="96" rx="24" ry="26" fill="#f3e3c8" />
+            <path d="M50 88q4 4 8 0M62 88q4 4 8 0M50 100q4 4 8 0M62 100q4 4 8 0M56 94q4 4 8 0" stroke="#c9a77f"
+              stroke-width="2" stroke-linecap="round" fill="none" />
+            <circle cx="44" cy="58" r="16" fill="#f7efe2" />
+            <circle cx="76" cy="58" r="16" fill="#f7efe2" />
+            <circle cx="44" cy="58" r="16" fill="none" stroke="#10283d" stroke-width="3" />
+            <circle cx="76" cy="58" r="16" fill="none" stroke="#10283d" stroke-width="3" />
+            <path d="M58 56q2-2 4 0" stroke="#10283d" stroke-width="3" fill="none" />
+            <circle cx="45" cy="59" r="6.5" fill="#10283d" />
+            <circle cx="75" cy="59" r="6.5" fill="#10283d" />
+            <circle cx="47" cy="56.5" r="2" fill="#fff" />
+            <circle cx="77" cy="56.5" r="2" fill="#fff" />
+            <path d="M54 70l6 9 6-9q-6-3-12 0z" fill="#f4b63f" />
+          </g>
+        </svg>
+        Albert <small>by REL8</small>
+      </span>
+      <span id="user-box" class="user-box" hidden>
+        <nav class="tabs" aria-label="Sections">
+          <button type="button" data-view="customers-view" aria-current="page">Customers</button>
+          <button type="button" data-view="calls-view">Calls</button>
+          <button type="button" data-view="debug-view">Debug</button>
+        </nav>
+        <span id="user-email"></span>
+        <button id="logout-btn" type="button">Log out</button>
+      </span>
+    </nav>
+  </header>
+
+  <section class="in call" id="login" hidden>
+    <div class="card">
+      <h2>Sign in</h2>
+      <form id="login-form">
+        <label>Email
+          <input name="email" type="email" autocomplete="email" required>
+        </label>
+        <button class="btn" type="submit">Send sign-in link</button>
+        <p id="login-status" class="status" role="status" aria-live="polite"></p>
+        <span class="hint">We email you a link. Open it in this browser to sign in.</span>
+      </form>
+    </div>
+  </section>
+
+  <div id="app" hidden>
+  <main id="customers-view" class="workspace">
+    <section class="card list-card" aria-labelledby="customers-title">
+      <header class="list-head">
+        <h2 id="customers-title">Customers</h2>
+        <button id="new-customer-btn" class="btn small" type="button">+ New customer</button>
+      </header>
+      <div class="overview-tools">
+        <label>Search
+          <input id="overview-search" type="search" placeholder="Name or phone" autocomplete="off">
+        </label>
+        <label>Show
+          <select id="overview-filter">
+            <option value="all">All customers</option>
+            <option value="nothing">Nothing scheduled</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="calling">Calling now</option>
+            <option value="opted-out">Opted out</option>
+            <option value="review">Needs review</option>
+          </select>
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table class="overview">
+          <thead><tr>
+            <th><button type="button" class="sort" data-sort="name">Customer</button></th>
+            <th><button type="button" class="sort" data-sort="status">Status</button></th>
+            <th aria-sort="ascending"><button type="button" class="sort" data-sort="next">Next call</button></th>
+            <th><button type="button" class="sort" data-sort="last">Last call</button></th>
+          </tr></thead>
+          <tbody id="overview-rows"><tr><td colspan="4">Loading customers…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="card panel" id="customer-panel" aria-live="polite">
+      <p id="panel-empty" class="panel-empty">Select a customer to see their callbacks and calls.</p>
+      <div id="panel-body" hidden>
+        <button id="panel-back" class="link-btn panel-back" type="button">← Back to list</button>
+        <header class="panel-head">
+          <h2 id="panel-name"></h2>
+          <span id="panel-badge" class="badge"></span>
+          <span id="panel-review-badge" class="badge review" hidden>Review</span>
+        </header>
+        <p id="panel-contact" class="panel-meta"></p>
+        <div id="panel-review" class="review-box" hidden>
+          <p>Signed up on an inbound call. Check name, phone and time zone, then mark as reviewed.</p>
+          <button id="mark-reviewed" class="btn small secondary" type="button">Mark reviewed</button>
+          <p id="review-status" class="status" role="status" aria-live="polite"></p>
+        </div>
+        <p id="panel-optout" class="panel-note" hidden>This customer opted out of calls.</p>
+
+        <h3 class="panel-label">Pending callbacks</h3>
+        <ul id="panel-pending" class="pending-list"></ul>
+
+        <h3 class="panel-label">Last call</h3>
+        <p id="panel-last-call" class="panel-meta"></p>
+
+        <div id="panel-actions" class="panel-actions">
+          <button id="open-schedule" class="btn small" type="button">Schedule callback</button>
+          <button id="open-call" class="btn small secondary" type="button">Call now</button>
+        </div>
+
+        <details id="panel-edit" class="edit-zone">
+          <summary>Edit zone</summary>
+          <form id="edit-form" class="edit-form">
+            <label>First name
+              <input name="first_name" type="text" maxlength="100" autocomplete="off" required>
+            </label>
+            <label>Middle name <span class="optional">(optional)</span>
+              <input name="middle_name" type="text" maxlength="100" autocomplete="off">
+            </label>
+            <label>Last name
+              <input name="last_name" type="text" maxlength="100" autocomplete="off" required>
+            </label>
+            <label>Time zone
+              <span class="combo">
+                <input id="edit-tz-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+                  aria-controls="edit-tz-list" placeholder="Search city, region or offset, e.g. Zurich or UTC+2"
+                  autocomplete="off" spellcheck="false">
+                <ul id="edit-tz-list" class="tz-list" role="listbox" hidden></ul>
+              </span>
+              <input name="timezone" type="hidden">
+              <span class="hint">Pending callbacks keep their local time in the new zone.</span>
+            </label>
+            <label>Default assistant
+              <select name="vapi_assistant_id" data-vapi="assistants" data-empty="Choose an assistant" disabled>
+                <option value="">Loading assistants…</option>
+              </select>
+              <span class="hint">For inbound calls and callbacks scheduled without their own assistant.</span>
+            </label>
+            <button class="btn small secondary" type="submit" disabled>Save changes</button>
+          </form>
+          <p id="edit-status" class="status" role="status" aria-live="polite"></p>
+        </details>
+
+        <details id="panel-danger" class="danger-zone">
+          <summary>Danger zone</summary>
+          <p class="hint">These actions can't be undone.</p>
+          <div class="danger-actions">
+            <button id="open-erase" class="btn small danger" type="button">Erase memory</button>
+            <button id="open-delete" class="btn small danger" type="button">Delete customer</button>
+          </div>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <main id="calls-view" class="in" hidden>
+    <section class="card" aria-labelledby="calls-title">
+      <h2 id="calls-title">Calls</h2>
+      <div class="overview-tools">
+        <label>Search
+          <input id="calls-search" type="search" placeholder="Name or phone" autocomplete="off">
+        </label>
+        <label>Show
+          <select id="calls-filter">
+            <option value="">All calls</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="calling">Calling now</option>
+            <option value="past">Past calls</option>
+            <option value="completed">Completed</option>
+            <option value="no_answer">No answer</option>
+            <option value="voicemail">Voicemail</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </label>
+      </div>
+      <p id="calls-zone" class="hint"></p>
+      <div id="calls-table" class="table-wrap">
+        <table class="overview calls">
+          <thead><tr>
+            <th><button type="button" class="sort" data-sort="number">Number</button></th>
+            <th><button type="button" class="sort" data-sort="name">Name</button></th>
+            <th aria-sort="descending"><button type="button" class="sort" data-sort="call_date">Call date</button></th>
+            <th><button type="button" class="sort" data-sort="status">Status</button></th>
+            <th><button type="button" class="sort" data-sort="direction">Direction</button></th>
+            <th><button type="button" class="sort" data-sort="duration">Duration</button></th>
+          </tr></thead>
+          <tbody id="calls-rows"><tr><td colspan="6">Open the tab to load calls.</td></tr></tbody>
+        </table>
+      </div>
+      <nav class="pager" aria-label="Pages">
+        <button id="calls-prev" class="btn small secondary" type="button" disabled>← Previous</button>
+        <span id="calls-range" role="status"></span>
+        <button id="calls-next" class="btn small secondary" type="button" disabled>Next →</button>
+      </nav>
+    </section>
+  </main>
+
+  <main id="debug-view" class="in" hidden>
+    <section class="card" aria-labelledby="debug-title">
+      <h2 id="debug-title">Debug</h2>
+      <p id="dispatch-info" class="hint dispatch-info" role="status"></p>
+      <p id="archive-info" class="hint" role="status"></p>
+      <button id="dispatch-btn" class="btn small secondary" type="button">Run dispatcher now</button>
+      <span class="hint">Starts due callbacks right away instead of waiting for the next cron run (every minute on Vercel).</span>
+      <p id="dispatch-status" class="status" role="status" aria-live="polite"></p>
+      <button id="archive-btn" class="btn small secondary" type="button">Run archive now</button>
+      <span class="hint">Saves new calls and recordings and continues the 14-day backfill right away; the cron does the same every minute.</span>
+      <p id="archive-status" class="status" role="status" aria-live="polite"></p>
+      <button id="test-email-btn" class="btn small secondary" type="button">Send test email</button>
+      <span class="hint">Stores a team notification ("Other"); the dispatcher emails it to TEAM_EMAIL within a minute.</span>
+      <p id="test-email-status" class="status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  </div>
+
+  <dialog id="call-detail" class="call-detail" aria-labelledby="call-detail-title">
+    <header class="dialog-head">
+      <h2 id="call-detail-title">Call</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Close">×</button>
+    </header>
+    <p id="call-detail-status" class="status" role="status" aria-live="polite"></p>
+    <div id="call-detail-body" hidden>
+      <dl id="call-detail-meta" class="call-meta"></dl>
+      <section id="call-detail-audio-box" aria-labelledby="call-detail-audio-title">
+        <h3 id="call-detail-audio-title">Recording</h3>
+        <audio id="call-detail-audio" controls preload="metadata" hidden></audio>
+        <p id="call-detail-audio-note" class="hint"></p>
+      </section>
+      <section id="call-detail-transcript-box" aria-labelledby="call-detail-transcript-title">
+        <h3 id="call-detail-transcript-title">Transcript</h3>
+        <ol id="call-detail-transcript" class="transcript"></ol>
+        <p id="call-detail-transcript-note" class="hint"></p>
+      </section>
+      <section aria-labelledby="call-detail-notes-title">
+        <h3 id="call-detail-notes-title">Staff notes</h3>
+        <ol id="call-detail-notes" class="call-notes"></ol>
+        <p id="call-detail-notes-note" class="hint"></p>
+        <form id="call-note-form" class="call-note-form">
+          <label>New note
+            <textarea name="body" rows="3" maxlength="4000" required placeholder="Visible to staff only; not sent to Albert."></textarea>
+          </label>
+          <button class="btn small" type="submit">Add note</button>
+          <p id="call-note-status" class="status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog id="schedule-dialog" aria-labelledby="schedule-dialog-title">
+    <form id="schedule-form">
+      <header class="dialog-head">
+        <h2 id="schedule-dialog-title">Schedule a callback</h2>
+        <button class="icon-btn" type="button" data-close aria-label="Close">×</button>
+      </header>
+      <label>Date and time <span class="optional">(customer's local time)</span>
+        <input name="local_time" type="datetime-local" required>
+        <span id="schedule-hours" class="hint"></span>
+      </label>
+      <div id="schedule-picks" class="quick-picks" aria-label="Quick picks"></div>
+      <p id="schedule-warning" class="hint warn" role="status" hidden></p>
+      <label>Assistant
+        <select name="vapi_assistant_id" data-vapi="assistants" data-empty="Customer's default" disabled>
+          <option value="">Loading assistants…</option>
+        </select>
+      </label>
+      <label>Call from
+        <select name="vapi_phone_number_id" data-vapi="phone_numbers" data-empty="Customer's default" disabled>
+          <option value="">Loading phone numbers…</option>
+        </select>
+      </label>
+      <label>Instructions for Albert <span class="optional">(optional)</span>
+        <textarea name="instructions" rows="3" maxlength="1000" placeholder="e.g. Ask how the doctor's appointment went."></textarea>
+        <span class="hint">Added to the assistant's prompt for this call.</span>
+      </label>
+      <button class="btn small" type="submit">Schedule callback</button>
+      <p id="schedule-status" class="status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <dialog id="call-dialog" aria-labelledby="call-dialog-title">
+    <form id="call-form">
+      <header class="dialog-head">
+        <h2 id="call-dialog-title">Call now</h2>
+        <button class="icon-btn" type="button" data-close aria-label="Close">×</button>
+      </header>
+      <label>Assistant
+        <select name="assistant_id" data-vapi="assistants" data-empty="Customer's default" disabled>
+          <option value="">Loading assistants…</option>
+        </select>
+      </label>
+      <label>Call from
+        <select name="assistant_phone_id" data-vapi="phone_numbers" data-empty="Customer's default" disabled>
+          <option value="">Loading phone numbers…</option>
+        </select>
+      </label>
+      <label>Instructions for Albert <span class="optional">(optional)</span>
+        <textarea name="instructions" rows="3" maxlength="1000" placeholder="e.g. Remind her about tomorrow's visit."></textarea>
+        <span class="hint">Added to the assistant's prompt for this call.</span>
+      </label>
+      <button class="btn small" type="submit">Call now</button>
+      <p id="call-status" class="status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <dialog id="danger-dialog" aria-labelledby="danger-dialog-title">
+    <form id="danger-form">
+      <header class="dialog-head">
+        <h2 id="danger-dialog-title"></h2>
+        <button class="icon-btn" type="button" data-close aria-label="Close">×</button>
+      </header>
+      <p id="danger-text"></p>
+      <label>Type <strong id="danger-phone"></strong> to confirm
+        <input name="confirm_phone" type="text" inputmode="tel" autocomplete="off" required>
+      </label>
+      <button class="btn small danger" type="submit" disabled></button>
+      <p id="danger-status" class="status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <dialog id="customer-dialog" aria-labelledby="customer-dialog-title">
+    <form id="customer-form">
+      <header class="dialog-head">
+        <h2 id="customer-dialog-title">New customer</h2>
+        <button class="icon-btn" type="button" data-close aria-label="Close">×</button>
+      </header>
+      <label>First name
+        <input name="first_name" type="text" maxlength="100" autocomplete="off" required>
+      </label>
+      <label>Middle name <span class="optional">(optional)</span>
+        <input name="middle_name" type="text" maxlength="100" autocomplete="off">
+      </label>
+      <label>Last name
+        <input name="last_name" type="text" maxlength="100" autocomplete="off" required>
+      </label>
+      <label>Phone number
+        <input name="phone" type="tel" placeholder="+41 79 123 45 67" autocomplete="off" required>
+      </label>
+      <label>Time zone
+        <span class="combo">
+          <input id="tz-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+            aria-controls="tz-list" placeholder="Search city, region or offset, e.g. Zurich or UTC+2"
+            autocomplete="off" spellcheck="false">
+          <ul id="tz-list" class="tz-list" role="listbox" hidden></ul>
+        </span>
+        <input name="timezone" type="hidden">
+      </label>
+      <label>Default assistant
+        <select name="vapi_assistant_id" data-vapi="assistants" data-empty="Choose an assistant" required disabled>
+          <option value="">Loading assistants…</option>
+        </select>
+      </label>
+      <label>Default phone number to call from
+        <select name="vapi_phone_number_id" data-vapi="phone_numbers" data-empty="Choose a phone number" required disabled>
+          <option value="">Loading phone numbers…</option>
+        </select>
+      </label>
+      <button class="btn small" type="submit">Save customer</button>
+      <p id="customer-status" class="status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <footer class="in">© 2026 REL8 · Zürich, Switzerland</footer>
+
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"
+    integrity="sha384-rwykjmWNwVxboyFmvK9OXN0wj9hnMHA2aAHtits54DuACyCq0M2PrSNxhRb+hvXT"
+    crossorigin="anonymous"></script>
+  <script type="module" src="/assets/js/main.js"></script>
+</body>
+
+</html>

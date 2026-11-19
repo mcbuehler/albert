@@ -1,0 +1,30 @@
+# Keep the Docker build context free of secrets, host-specific files and clutter.
+
+# Secrets / environment
+**/.env
+**/.env.*
+**/.env_*
+!.env.example
+**/.vercel
+
+# Host virtualenv (the image builds its own with `uv sync`) and caches
+**/.venv
+env
+venv
+ENV
+env.bak
+venv.bak
+**/__pycache__
+**/*.pyc
+**/.ruff_cache
+
+# Version control, local runtime output and private source material
+**/.git
+logs
+**/*.log
+**/*.log.*
+vapi_configs
+**/.claude
+**/CLAUDE.md
+**/HANDOFF.md
+**/tmp*
