@@ -2,14 +2,14 @@
 
 [![Tests](https://github.com/mcbuehler/albert/actions/workflows/tests.yml/badge.svg)](https://github.com/mcbuehler/albert/actions/workflows/tests.yml)
 
-Backend and assistant configurations for **Albert**, a Vapi voice assistant with long-term memory (Hindsight). Albert answers inbound calls, places outbound and scheduled callbacks, archives call records and available recordings and transcripts, and provides a staff page to manage customers and review calls.
+Backend and assistant configurations for **Albert**, a [Vapi](https://vapi.ai/) voice assistant with long-term memory ([Hindsight](https://ui.hindsight.vectorize.io)). Albert answers inbound calls, places outbound and scheduled callbacks, archives call records and available recordings and transcripts, and provides a staff page to manage customers and review calls.
 
 [<img src="public/assets/img/backend1.jpg" alt="Customers page with customer details and callback controls" width="320">](public/assets/img/backend1.jpg)
 [<img src="public/assets/img/backend2.jpg" alt="Calls page with scheduled callbacks and archived calls" width="320">](public/assets/img/backend2.jpg)
 
 ## Quickstart
 
-Use [uv](https://docs.astral.sh/uv/) with Python 3.12. A working deployment needs **Supabase, Hindsight Cloud, Vapi and Brave Search API accounts**, plus a compatible phone connection.
+Use [uv](https://docs.astral.sh/uv/) with Python 3.12. A working deployment needs [Supabase](https://supabase.com/dashboard), [Hindsight Cloud](https://ui.hindsight.vectorize.io), [Vapi](https://dashboard.vapi.ai/signup) and [Brave Search API](https://api-dashboard.search.brave.com/) accounts, plus a compatible phone connection.
 See [setup](docs/setup.md) for account links, credentials, database and Vapi configuration. Review the [known production issues](docs/known-production-issues.md) before connecting real callers.
 
 ```bash
